@@ -1,9 +1,7 @@
 import { Arr, Fun, Merger, Obj, Optional, Thunk, Type } from '@ephox/katamari';
 import { SimpleResult, SimpleResultType } from '../alien/SimpleResult';
 import * as FieldPresence from '../api/FieldPresence';
-import * as Objects from '../api/Objects';
 import { ResultCombine } from '../combine/ResultCombine';
-import * as ObjWriter from './ObjWriter';
 import * as SchemaError from './SchemaError';
 import * as ValuePresence from './ValuePresence';
 
@@ -12,99 +10,93 @@ type SchemaError = SchemaError.SchemaError;
 export type ValueValidator = (a) => SimpleResult<string, any>;
 export type PropExtractor = (path: string[], val: any) => SimpleResult<SchemaError[], any>;
 export type ValueExtractor = (label: string, prop: Processor, obj: any) => SimpleResult<SchemaError[], string>;
+type Bundle<T> = (val: T) => SimpleResult<SchemaError[], T>;
+
 export interface Processor {
-  extractProp: PropExtractor;
-  toString: () => string;
+  readonly extractProp: PropExtractor;
+  readonly toString: () => string;
 }
 
 const output = (newKey: string, value: any): ValuePresence.StateProcessorData => ValuePresence.state(newKey, Fun.constant(value));
 
 const snapshot = (newKey: string): ValuePresence.StateProcessorData => ValuePresence.state(newKey, Fun.identity);
 
-const strictAccess = <T>(path: string[], obj: Record<string, T>, key: string): SimpleResult<SchemaError[], T> => {
+const strictAccess = <T>(path: string[], obj: Record<string, T>, key: string, bundle: Bundle<T>): SimpleResult<SchemaError[], T> => {
   // In strict mode, if it undefined, it is an error.
-  return Obj.get(obj, key).fold<SimpleResult<SchemaError[], any>>(() =>
-    SchemaError.missingStrict(path, key, obj), SimpleResult.svalue);
-};
-
-const fallbackAccess = <T>(obj: Record<string, T>, key: string, fallbackThunk: (obj: Record<string, T>) => T): SimpleResult<SchemaError[], T> => {
-  const v = Obj.get(obj, key).fold(() => fallbackThunk(obj), Fun.identity);
-  return SimpleResult.svalue(v);
-};
-
-const optionAccess = <T>(obj: Record<string, T>, key: string): SimpleResult<SchemaError[], Optional<T>> =>
-  SimpleResult.svalue(Obj.get(obj, key));
-
-const optionDefaultedAccess = <T>(obj: Record<string, T | true>, key: string, fallback: (obj: Record<string, T | true>) => T): SimpleResult<SchemaError[], Optional<T>> => {
-  const opt = Obj.get(obj, key).map((val) => val === true ? fallback(obj) : val);
-  return SimpleResult.svalue(opt);
-};
-
-type SimpleBundle = SimpleResult<SchemaError[], any>;
-type OptionBundle = SimpleResult<SchemaError[], Record<string, Optional<any>>>;
-
-const cExtractOne = <T>(path: string[], obj: Record<string, T>, value: ValuePresence.ValueProcessorTypes): SimpleResult<SchemaError[], T> => {
-  return ValuePresence.fold(
-    value,
-    (key, newKey, presence, prop) => {
-      const bundle = (av: any): SimpleBundle => {
-        const result = prop.extractProp(path.concat([ key ]), av);
-        return SimpleResult.map(result, (res) => ObjWriter.wrap(newKey, res));
-      };
-
-      const bundleAsOption = (optValue: Optional<any>): OptionBundle => {
-        return optValue.fold(() => {
-          const outcome = ObjWriter.wrap(newKey, Optional.none());
-          return SimpleResult.svalue(outcome);
-        }, (ov) => {
-          const result: SimpleResult<any, any> = prop.extractProp(path.concat([ key ]), ov);
-          return SimpleResult.map(result, (res) => {
-            return ObjWriter.wrap(newKey, Optional.some(res));
-          });
-        });
-      };
-
-      switch (presence.tag) {
-        case FieldPresence.FieldType.Strict:
-          return SimpleResult.bind(
-            strictAccess(path, obj, key),
-            bundle
-          );
-        case FieldPresence.FieldType.DefaultedThunk:
-          return SimpleResult.bind(
-            fallbackAccess(obj, key, presence.process),
-            bundle
-          );
-        case FieldPresence.FieldType.Option:
-          return SimpleResult.bind(
-            optionAccess(obj, key),
-            bundleAsOption
-          );
-        case FieldPresence.FieldType.DefaultedOptionThunk:
-          return SimpleResult.bind(
-            optionDefaultedAccess(obj, key, presence.process),
-            bundleAsOption
-          );
-        case FieldPresence.FieldType.MergeWithThunk: {
-          const base = presence.process(obj);
-          const result = SimpleResult.map(
-            fallbackAccess(obj, key, Fun.constant({})),
-            (v) => Merger.deepMerge(base, v)
-          );
-          return SimpleResult.bind(result, bundle);
-        }
-      }
-    },
-    (newKey, instantiator) => {
-      const state = instantiator(obj);
-      return SimpleResult.svalue(ObjWriter.wrap(newKey, state));
-    }
+  return Obj.get(obj, key).fold(
+    () => SchemaError.missingStrict(path, key, obj),
+    bundle
   );
 };
 
-const cExtract = <T>(path: string[], obj: Record<string, T>, fields: ValuePresence.ValueProcessorTypes[]): SimpleResult<SchemaError[], T> => {
-  const results = Arr.map(fields, (field) => cExtractOne(path, obj, field));
-  return ResultCombine.consolidateObj(results, {});
+const fallbackAccess = <T>(obj: Record<string, T>, key: string, fallbackThunk: (obj: Record<string, T>) => T, bundle: Bundle<T>): SimpleResult<SchemaError[], T> => {
+  const v = Obj.get(obj, key).getOrThunk(() => fallbackThunk(obj));
+  return bundle(v);
+};
+
+const optionAccess = <T>(obj: Record<string, T>, key: string, bundle: Bundle<Optional<T>>): SimpleResult<SchemaError[], Optional<T>> =>
+  bundle(Obj.get(obj, key));
+
+const optionDefaultedAccess = <T>(obj: Record<string, T | true>, key: string, fallback: (obj: Record<string, T | true>) => T, bundle: Bundle<Optional<T>>): SimpleResult<SchemaError[], Optional<T>> => {
+  const opt = Obj.get(obj, key).map((val) => val === true ? fallback(obj) : val);
+  return bundle(opt);
+};
+
+type SimpleBundle = SimpleResult<SchemaError[], any>;
+type OptionBundle = SimpleResult<SchemaError[], Optional<any>>;
+
+const extractField = <T>(field: FieldPresence.FieldPresenceTypes, path: string[], obj: Record<string, T>, key: string, newKey: string, prop: Processor): SimpleResult<SchemaError[], any> => {
+  const bundle = (av: any): SimpleBundle => prop.extractProp(path.concat([ key ]), av);
+
+  const bundleAsOption = (optValue: Optional<any>): OptionBundle => {
+    return optValue.fold(
+      () => SimpleResult.svalue(Optional.none()),
+      (ov) => {
+        const result = prop.extractProp(path.concat([ key ]), ov);
+        return SimpleResult.map(result, Optional.some);
+      }
+    );
+  };
+
+  switch (field.tag) {
+    case FieldPresence.FieldType.Strict:
+      return strictAccess(path, obj, key, bundle);
+    case FieldPresence.FieldType.DefaultedThunk:
+      return fallbackAccess(obj, key, field.process, bundle);
+    case FieldPresence.FieldType.Option:
+      return optionAccess(obj, key, bundleAsOption);
+    case FieldPresence.FieldType.DefaultedOptionThunk:
+      return optionDefaultedAccess(obj, key, field.process, bundleAsOption);
+    case FieldPresence.FieldType.MergeWithThunk: {
+      return fallbackAccess(obj, key, Fun.constant({}), (v) => {
+        const result = Merger.deepMerge(field.process(obj), v);
+        return bundle(result);
+      });
+    }
+  }
+};
+
+const cExtract = <T>(path: string[], obj: Record<string, T>, fields: ValuePresence.ValueProcessorTypes[]): SimpleResult<SchemaError[], Record<string, T>> => {
+  const success: Record<string, T> = {};
+  const errors: SchemaError[] = [];
+
+  // PERFORMANCE: We use a for loop here instead of Arr.each as this is a hot code path
+  for (const field of fields) {
+    ValuePresence.fold(
+      field,
+      (key, newKey, presence, prop) => {
+        const result = extractField(presence, path, obj, key, newKey, prop);
+        SimpleResult.fold(result,
+          (err) => errors.push(...err),
+          (res) => success[newKey] = res
+        );
+      },
+      (newKey, instantiator) => {
+        success[newKey] = instantiator(obj);
+      }
+    );
+  }
+  return errors.length > 0 ? SimpleResult.serror(errors) : SimpleResult.svalue(success);
 };
 
 const valueThunk = (getDelegate: () => Processor): Processor => {
@@ -119,14 +111,14 @@ const valueThunk = (getDelegate: () => Processor): Processor => {
 };
 
 const value = (validator: ValueValidator): Processor => {
-  const extract = (path, val) => {
+  const extract = (path: string[], val: any) => {
     return SimpleResult.bindError(
       validator(val),
       (err) => SchemaError.custom(path, err)
     );
   };
 
-  const toString = () => 'val';
+  const toString = Fun.constant('val');
 
   return {
     extractProp: extract,
@@ -135,22 +127,22 @@ const value = (validator: ValueValidator): Processor => {
 };
 
 // This is because Obj.keys can return things where the key is set to undefined.
-const getSetKeys = (obj) => Obj.keys(Obj.filter(obj, (value) => value !== undefined && value !== null));
+const getSetKeys = (obj: Record<string, unknown>) => Obj.keys(Obj.filter(obj, Type.isNonNullable));
 
 const objOfOnly = (fields: ValuePresence.ValueProcessorTypes[]): Processor => {
   const delegate = objOf(fields);
 
-  const fieldNames = Arr.foldr<ValuePresence.ValueProcessorTypes, Record<string, string>>(fields, (acc, value: ValuePresence.ValueProcessorTypes) => {
+  const fieldNames = Arr.foldr(fields, (acc, value) => {
     return ValuePresence.fold(
       value,
-      (key) => Merger.deepMerge(acc, Objects.wrap(key, true)),
+      (key) => Merger.deepMerge(acc, { [key]: true }),
       Fun.constant(acc)
     );
-  }, {});
+  }, {} as Record<string, boolean>);
 
-  const extract = (path, o) => {
+  const extract = (path: string[], o: boolean | Record<string, any>) => {
     const keys = Type.isBoolean(o) ? [] : getSetKeys(o);
-    const extra = Arr.filter(keys, (k) => !Obj.hasNonNullableKey(fieldNames, k));
+    const extra = Arr.filter(keys, (k) => !Obj.has(fieldNames, k));
 
     return extra.length === 0 ? delegate.extractProp(path, o) : SchemaError.unsupportedFields(path, extra);
   };
@@ -180,7 +172,7 @@ const objOf = (values: ValuePresence.ValueProcessorTypes[]): Processor => {
 };
 
 const arrOf = (prop: Processor): Processor => {
-  const extract = (path, array) => {
+  const extract = (path: string[], array: any[]) => {
     const results = Arr.map(array, (a, i) => prop.extractProp(path.concat([ '[' + i + ']' ]), a));
     return ResultCombine.consolidateArr(results);
   };
@@ -219,9 +211,8 @@ const oneOf = (props: Processor[]): Processor => {
 };
 
 const setOf = (validator: ValueValidator, prop: Processor): Processor => {
-  const validateKeys = (path, keys) => arrOf(value(validator)).extractProp(path, keys);
-  const extract = (path, o) => {
-    //
+  const validateKeys = (path: string[], keys: string[]) => arrOf(value(validator)).extractProp(path, keys);
+  const extract = (path: string[], o: Record<string, any>) => {
     const keys = Obj.keys(o);
     const validatedKeys = validateKeys(path, keys);
     return SimpleResult.bind(validatedKeys, (validKeys) => {

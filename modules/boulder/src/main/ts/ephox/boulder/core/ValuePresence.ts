@@ -15,7 +15,7 @@ interface FieldData {
 
 interface StateData {
   readonly newKey: string;
-  readonly instantiator: (obj: any) => unknown;
+  readonly instantiator: (obj: any) => any;
 }
 
 interface ValuePresenceData<D extends ValueType, T> {
@@ -37,10 +37,9 @@ const state = (newKey: string, instantiator: (obj: any) => any): StateProcessorD
 
 const fold = <T>(value: ValueProcessorTypes, ifField: FieldValueProcessor<T>, ifState: StateValueProcessor<T>): T => {
   switch (value.tag) {
-    case ValueType.Field: {
+    case ValueType.Field:
       const data = value.data;
       return ifField(data.key, data.newKey, data.presence, data.prop);
-    }
     case ValueType.State:
       return ifState(value.data.newKey, value.data.instantiator);
   }
