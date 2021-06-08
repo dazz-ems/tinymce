@@ -7,9 +7,11 @@ import { AnchorBox, AnchorElement, AnchorLayout } from './LayoutTypes';
 import * as Placement from './Placement';
 
 /*
-  Layouts for things that go inside the editable area.
-  Designed for use with fixed_toolbar_container.
-  See the LayoutInsideDemo for examples.
+  Layouts for things that overlay over the anchor element/box. These are designed to mirror
+  the `Layout` logic.
+
+  As an example `Layout.north` will appear horizontally centered above the anchor, whereas
+  `LayoutInside.north` will appear horizontally centered overlapping the top of the anchor.
  */
 
 const labelPrefix = 'layout-inner';
@@ -32,51 +34,51 @@ const southY = (anchor: AnchorBox, element: AnchorElement): number => anchor.y +
 // returns centre of anchor minus half the element height - used to vertically centre element to the anchor
 const centreY = (anchor: AnchorBox, element: AnchorElement): number => anchor.y + (anchor.height / 2) - (element.height / 2);
 
-// positions element in bottom right of the anchor
-const southeast: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
+// positions element relative to the bottom right of the anchor
+const southwest: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   eastEdgeX(anchor, element),
   southY(anchor, element),
-  bubbles.innerSoutheast(),
+  bubbles.innerSouthwest(),
   Direction.northwest(),
-  Placement.southeast,
+  Placement.southwest,
   boundsRestriction(anchor, { right: AnchorBoxBounds.RightEdge, bottom: AnchorBoxBounds.BottomEdge }),
   labelPrefix
 );
 
-// positions element in the bottom left of the anchor
-const southwest: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
+// positions element relative to the bottom left of the anchor
+const southeast: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   westEdgeX(anchor),
   southY(anchor, element),
-  bubbles.innerSouthwest(),
+  bubbles.innerSoutheast(),
   Direction.northeast(),
-  Placement.southwest,
+  Placement.southeast,
   boundsRestriction(anchor, { left: AnchorBoxBounds.LeftEdge, bottom: AnchorBoxBounds.BottomEdge }),
   labelPrefix
 );
 
-// positions element in the top right of the anchor
-const northeast: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
+// positions element relative to the top right of the anchor
+const northwest: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   eastEdgeX(anchor, element),
   northY(anchor),
-  bubbles.innerNortheast(),
+  bubbles.innerNorthwest(),
   Direction.southwest(),
-  Placement.northeast,
+  Placement.northwest,
   boundsRestriction(anchor, { right: AnchorBoxBounds.RightEdge, top: AnchorBoxBounds.TopEdge }),
   labelPrefix
 );
 
-// positions element in the top left of the anchor
-const northwest: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
+// positions element relative to the top left of the anchor
+const northeast: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   westEdgeX(anchor),
   northY(anchor),
-  bubbles.innerNorthwest(),
+  bubbles.innerNortheast(),
   Direction.southeast(),
-  Placement.northwest,
+  Placement.northeast,
   boundsRestriction(anchor, { left: AnchorBoxBounds.LeftEdge, top: AnchorBoxBounds.TopEdge }),
   labelPrefix
 );
 
-// positions element at the top of the anchor, horizontally centered
+// positions element relative to the top of the anchor, horizontally centered
 const north: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   middleX(anchor, element),
   northY(anchor),
@@ -87,7 +89,7 @@ const north: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles:
   labelPrefix
 );
 
-// positions element at the bottom of the anchor, horizontally centered
+// positions element relative to the bottom of the anchor, horizontally centered
 const south: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   middleX(anchor, element),
   southY(anchor, element),
@@ -98,7 +100,7 @@ const south: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles:
   labelPrefix
 );
 
-// positions element with right edge against the anchor, vertically centered
+// positions element with the right edge against the anchor, vertically centered
 const east: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   eastEdgeX(anchor, element),
   centreY(anchor, element),
@@ -109,7 +111,7 @@ const east: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: 
   labelPrefix
 );
 
-// positions element with left each against the anchor, vertically centered
+// positions element with the left each against the anchor, vertically centered
 const west: AnchorLayout = (anchor: AnchorBox, element: AnchorElement, bubbles: Bubble) => NuSpotInfo(
   westEdgeX(anchor),
   centreY(anchor, element),
