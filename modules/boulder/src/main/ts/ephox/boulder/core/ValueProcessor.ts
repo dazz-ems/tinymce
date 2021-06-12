@@ -172,9 +172,7 @@ const value = (validator: ValueValidator): Processor => {
     );
   };
 
-  const toString = () => {
-    return 'val';
-  };
+  const toString = Fun.constant('val');
 
   return {
     extract,
