@@ -56,26 +56,6 @@ const init = (initialData: LinkDialogData, linkCatalog: LinkDialogCatalog) => {
     title: initialData.title
   };
 
-  const getTitleFromUrlChange = (url: LinkDialogUrlData): Optional<string> =>
-    Optionals.someIf(persistentData.title.length <= 0, Optional.from(url.meta.title).getOr(''));
-
-  const getTextFromUrlChange = (url: LinkDialogUrlData): Optional<string> =>
-    Optionals.someIf(persistentData.text.length <= 0, Optional.from(url.meta.text).getOr(url.value));
-
-  const onUrlChange = (data: LinkDialogData): Optional<Partial<LinkDialogData>> => {
-    const text = getTextFromUrlChange(data.url);
-    const title = getTitleFromUrlChange(data.url);
-    // We are going to change the text/title because it has not been manually entered by the user.
-    if (text.isSome() || title.isSome()) {
-      return Optional.some({
-        ...text.map((text) => ({ text })).getOr({ }),
-        ...title.map((title) => ({ title })).getOr({ })
-      });
-    } else {
-      return Optional.none();
-    }
-  };
-
   const onCatalogChange = (data: LinkDialogData, change: { name: string }): Optional<Partial<LinkDialogData>> => {
     const catalog = findCatalog(linkCatalog, change.name).getOr([ ]);
     return getDelta(persistentData.text, change.name, catalog, data);
@@ -83,9 +63,7 @@ const init = (initialData: LinkDialogData, linkCatalog: LinkDialogCatalog) => {
 
   const onChange = (getData: () => LinkDialogData, change: { name: string }): Optional<Partial<LinkDialogData>> => {
     const name = change.name;
-    if (name === 'url') {
-      return onUrlChange(getData());
-    } else if (Arr.contains([ 'anchor', 'link' ], name)) {
+    if (Arr.contains([ 'anchor', 'link' ], name)) {
       return onCatalogChange(getData(), change);
     } else if (name === 'text' || name === 'title') {
       // Update the persistent text/title state, as a user has input custom text

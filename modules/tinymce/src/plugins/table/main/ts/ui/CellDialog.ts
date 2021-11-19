@@ -6,7 +6,7 @@
  */
 
 import { Selections } from '@ephox/darwin';
-import { Arr, Fun, Optional } from '@ephox/katamari';
+import { Arr, Optional } from '@ephox/katamari';
 import { TableLookup, Warehouse } from '@ephox/snooker';
 import { Compare, SugarElement } from '@ephox/sugar';
 import Editor from 'tinymce/core/api/Editor';
@@ -172,6 +172,7 @@ const open = (editor: Editor, selections: Selections) => {
       }
     ]
   };
+
   editor.windowManager.open({
     title: 'Cell Properties',
     size: 'normal',
@@ -190,7 +191,17 @@ const open = (editor: Editor, selections: Selections) => {
       }
     ],
     initialData: data,
-    onSubmit: Fun.curry(onSubmitCellForm, editor, cells)
+    onSubmit: (api) => {
+      const data = api.getData();
+      if (data.celltype === 'th') {
+        if (data.scope === '') {
+          editor.windowManager.alert('見出しセルのため、スコープを指定する必要があります');
+          return;
+        }
+      }
+
+      onSubmitCellForm( editor, cells, api );
+    }
   });
 };
 

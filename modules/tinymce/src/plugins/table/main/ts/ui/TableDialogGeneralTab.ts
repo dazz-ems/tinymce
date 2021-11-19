@@ -52,9 +52,13 @@ const getItems = (editor: Editor, classes: Dialog.ListBoxItemSpec[], insertNewTa
       inputMode: 'numeric'
     },
     {
-      type: 'input',
+      type: 'listbox',
       name: 'border',
-      label: 'Border width'
+      label: 'Border width',
+      items: [
+        { text:'NormalLine', value:'1px' },
+        { text:'BoldLine', value:'2px' }
+      ]
     },
     {
       type: 'label',

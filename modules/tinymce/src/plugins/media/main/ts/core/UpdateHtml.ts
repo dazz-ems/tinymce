@@ -101,6 +101,14 @@ const updateHtml = (html: string, data: Partial<MediaData>, updateAll?: boolean)
                 height: data.height
               });
             }
+
+            if (name === 'iframe')
+            {
+              setAttributes(attrs, {
+                title: data.title
+              });
+            }
+
             break;
         }
 

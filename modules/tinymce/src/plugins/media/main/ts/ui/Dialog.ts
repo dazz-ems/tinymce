@@ -57,6 +57,7 @@ const unwrap = (data: MediaDialogData, sourceInput?: keyof MediaDialogData): Med
     ...get('altsource'),
     ...get('poster'),
     ...get('embed'),
+    ...get('title'),
     ...getDimensions(data, metaData)
   } as MediaData;
 };
@@ -190,23 +191,10 @@ const showDialog = function (editor: Editor) {
     }));
   };
 
-  const mediaInput: Dialog.UrlInputSpec[] = [{
-    name: 'source',
-    type: 'urlinput',
-    filetype: 'media',
-    label: 'Source'
-  }];
-  const sizeInput: Dialog.SizeInputSpec[] = !Settings.hasDimensions(editor) ? [] : [{
-    type: 'sizeinput',
-    name: 'dimensions',
-    label: 'Constrain proportions',
-    constrain: true
-  }];
-
-  const generalTab = {
-    title: 'General',
-    name: 'general',
-    items: Arr.flatten<Dialog.BodyComponentSpec>([ mediaInput, sizeInput ])
+  const embedTitle: Dialog.InputSpec = {
+    type: 'input',
+    name: 'title',
+    label: 'title'
   };
 
   const embedTextarea: Dialog.TextAreaSpec = {
@@ -214,48 +202,20 @@ const showDialog = function (editor: Editor) {
     name: 'embed',
     label: 'Paste your embed code below:'
   };
+
+
   const embedTab = {
     title: 'Embed',
     items: [
+      embedTitle,
       embedTextarea
     ]
   };
 
-  const advancedFormItems: Dialog.BodyComponentSpec[] = [];
-
-  if (Settings.hasAltSource(editor)) {
-    advancedFormItems.push({
-      name: 'altsource',
-      type: 'urlinput',
-      filetype: 'media',
-      label: 'Alternative source URL'
-    }
-    );
-  }
-
-  if (Settings.hasPoster(editor)) {
-    advancedFormItems.push({
-      name: 'poster',
-      type: 'urlinput',
-      filetype: 'image',
-      label: 'Media poster (Image URL)'
-    });
-  }
-
-  const advancedTab = {
-    title: 'Advanced',
-    name: 'advanced',
-    items: advancedFormItems
-  };
-
   const tabs = [
-    generalTab,
+    // generalTab,
     embedTab
   ];
-
-  if (advancedFormItems.length > 0) {
-    tabs.push(advancedTab);
-  }
 
   const body: Dialog.TabPanelSpec = {
     type: 'tabpanel',
@@ -281,8 +241,15 @@ const showDialog = function (editor: Editor) {
     ],
     onSubmit(api) {
       const serviceData = unwrap(api.getData());
-      submitForm(currentData.get(), serviceData, editor);
-      api.close();
+      if ( serviceData.title === '' )
+      {
+        editor.windowManager.alert('タイトルを入力してください');
+      }
+      else
+      {
+        submitForm(currentData.get(), serviceData, editor);
+        api.close();
+      }
     },
     onChange(api, detail) {
       switch (detail.name) {

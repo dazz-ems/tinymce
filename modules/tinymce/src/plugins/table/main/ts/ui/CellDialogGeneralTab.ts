@@ -26,16 +26,6 @@ const getClassList = (editor: Editor): Optional<Dialog.ListBoxSpec> => {
 
 const children: Dialog.BodyComponentSpec[] = [
   {
-    name: 'width',
-    type: 'input',
-    label: 'Width'
-  },
-  {
-    name: 'height',
-    type: 'input',
-    label: 'Height'
-  },
-  {
     name: 'celltype',
     type: 'listbox',
     label: 'Cell type',
@@ -55,6 +45,16 @@ const children: Dialog.BodyComponentSpec[] = [
       { text: 'Row group', value: 'rowgroup' },
       { text: 'Column group', value: 'colgroup' }
     ]
+  },
+  {
+    name: 'width',
+    type: 'input',
+    label: 'Width'
+  },
+  {
+    name: 'height',
+    type: 'input',
+    label: 'Height'
   },
   {
     name: 'halign',

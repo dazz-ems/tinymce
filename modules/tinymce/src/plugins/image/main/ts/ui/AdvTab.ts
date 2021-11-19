@@ -47,13 +47,13 @@ const makeTab = (_info: ImageDialogInfo) => ({
             { text: 'Solid', value: 'solid' },
             { text: 'Dotted', value: 'dotted' },
             { text: 'Dashed', value: 'dashed' },
-            { text: 'Double', value: 'double' },
-            { text: 'Groove', value: 'groove' },
-            { text: 'Ridge', value: 'ridge' },
-            { text: 'Inset', value: 'inset' },
-            { text: 'Outset', value: 'outset' },
+            // { text: 'Double', value: 'double' },
+            // { text: 'Groove', value: 'groove' },
+            // { text: 'Ridge', value: 'ridge' },
+            // { text: 'Inset', value: 'inset' },
+            // { text: 'Outset', value: 'outset' },
             { text: 'None', value: 'none' },
-            { text: 'Hidden', value: 'hidden' }
+            // { text: 'Hidden', value: 'hidden' }
           ]
         }
       ]

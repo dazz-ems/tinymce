@@ -311,6 +311,10 @@ module.exports = function (grunt) {
             dest: 'js/tinymce/langs/readme.md'
           },
           {
+            src: 'src/langs/ja.js',
+            dest: 'js/tinymce/langs/ja.js'
+          },
+          {
             src: '../../LICENSE.TXT',
             dest: 'js/tinymce/license.txt'
           },
@@ -872,6 +876,12 @@ module.exports = function (grunt) {
 
   grunt.registerTask('version', 'Creates a version file', function () {
     grunt.file.write('dist/version.txt', BUILD_VERSION);
+    grunt.task.run('copy-to-app');
+  });
+
+  grunt.registerTask('copy-to-app', 'Copy to EMS app directory', function() {
+    if (grunt.file.exists('../../../pub/master/js/ems-tinymce')) grunt.file.delete('../../../pub/master/js/ems-tinymce', { force: true });
+    grunt.file.copy('js/tinymce', '../../../pub/master/js/ems-tinymce');
   });
 
   require('load-grunt-tasks')(grunt, {

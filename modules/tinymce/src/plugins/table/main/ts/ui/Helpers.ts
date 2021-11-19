@@ -109,13 +109,7 @@ const getAdvancedTab = (dialogName: 'table' | 'row' | 'cell') => {
         { text: 'Solid', value: 'solid' },
         { text: 'Dotted', value: 'dotted' },
         { text: 'Dashed', value: 'dashed' },
-        { text: 'Double', value: 'double' },
-        { text: 'Groove', value: 'groove' },
-        { text: 'Ridge', value: 'ridge' },
-        { text: 'Inset', value: 'inset' },
-        { text: 'Outset', value: 'outset' },
-        { text: 'None', value: 'none' },
-        { text: 'Hidden', value: 'hidden' }
+        { text: 'None', value: 'none' }
       ]
     },
     {
@@ -130,10 +124,14 @@ const getAdvancedTab = (dialogName: 'table' | 'row' | 'cell') => {
     }
   ];
 
-  const borderWidth: Dialog.InputSpec = {
+  const borderWidth: Dialog.ListBoxSpec = {
     name: 'borderwidth',
-    type: 'input',
-    label: 'Border width'
+    type: 'listbox',
+    label: 'Border width',
+    items: [
+      { text:'NormalLine', value:'1px' },
+      { text:'BoldLine', value:'2px' }
+    ]
   };
 
   const items = dialogName === 'cell' ? ([ borderWidth ] as Dialog.BodyComponentSpec[]).concat(advTabItems) : advTabItems;

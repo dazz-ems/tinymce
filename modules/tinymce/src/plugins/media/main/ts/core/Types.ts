@@ -12,6 +12,7 @@ export type MediaData = {
   width?: string;
   height?: string;
   embed?: string;
+  title?: string;
   poster: string;
   altsource: string;
   altsourcemime?: string;
@@ -28,6 +29,7 @@ export interface MediaDialogData {
   altsource: DialogSubData;
   poster: DialogSubData;
   embed?: string;
+  title?: string;
   dimensions?: {
     width?: string;
     height?: string;

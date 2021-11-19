@@ -20,6 +20,12 @@ import { LinkDialogData, LinkDialogInfo } from './DialogTypes';
 const handleSubmit = (editor: Editor, info: LinkDialogInfo) => (api: Dialog.DialogInstanceApi<LinkDialogData>) => {
   const data: LinkDialogData = api.getData();
 
+  if ( data.text === '' )
+  {
+    editor.windowManager.alert('リンク元テキストを入力してください');
+    return;
+  }
+
   if (!data.url.value) {
     Utils.unlink(editor);
     // Temporary fix. TODO: TINY-2811
