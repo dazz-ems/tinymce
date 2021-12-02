@@ -14,7 +14,6 @@ import { updateMenuText } from '../../dropdown/CommonDropdown';
 import { createMenuItems, createSelectButton, SelectSpec } from './BespokeSelect';
 import { AdvancedSelectDataset, SelectDataset } from './SelectDatasets';
 import { getStyleFormats } from './StyleFormat';
-import { findNearest } from './utils/FormatDetection';
 import { onActionToggleFormat } from './utils/Utils';
 
 const getSpec = (editor: Editor, dataset: SelectDataset): SelectSpec => {
@@ -34,8 +33,17 @@ const getSpec = (editor: Editor, dataset: SelectDataset): SelectSpec => {
       return subs !== undefined && subs.length > 0 ? Arr.bind(subs, getFormatItems) : [{ title: fmt.title, format: fmt.format }];
     };
     const flattenedItems = Arr.bind(getStyleFormats(editor), getFormatItems);
-    const detectedFormat = findNearest(editor, () => flattenedItems);
-    const text = detectedFormat.fold(() => 'Paragraph', (fmt) => fmt.title);
+
+    const selectedFormats = [];
+    flattenedItems.forEach((e) =>
+    {
+      if ( editor.formatter.match(e.format) )
+      {
+        selectedFormats.push( editor.translate(e.title) );
+      }
+    });
+
+    const text = selectedFormats.length > 0 ? selectedFormats.join(' + ') : 'Paragraph';
     AlloyTriggers.emitWith(comp, updateMenuText, {
       text
     });

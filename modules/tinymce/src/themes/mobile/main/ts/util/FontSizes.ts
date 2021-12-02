@@ -9,10 +9,10 @@ import { Arr, Fun, Optional } from '@ephox/katamari';
 import { Compare, Css, PredicateFind, SugarElement, SugarNode, Traverse } from '@ephox/sugar';
 import Editor from 'tinymce/core/api/Editor';
 
-const candidatesArray = [ '9px', '10px', '11px', '12px', '14px', '16px', '18px', '20px', '24px', '32px', '36px' ];
+const candidatesArray = [ '0.4rem', '0.6rem', '0.8rem', '1rem', '1.2rem', '1.5rem', '2rem', '3rem' ];
 
 const defaultSize = 'medium';
-const defaultIndex = 2;
+const defaultIndex = 3;
 
 const indexToSize = (index): Optional<string> =>
   Optional.from(candidatesArray[index]);

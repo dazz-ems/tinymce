@@ -10,7 +10,8 @@
 // When making changes here, please review menubar/menubar.less and menubar/menubar-button.less
 //
 
-@toolbar-button-bespoke-label-max-width: 7em;
+@toolbar-button-bespoke-label-min-width: 7em;
+@toolbar-button-bespoke-label-width: auto;
 
 .tox {
   .tox-tbtn--select {
@@ -39,9 +40,10 @@
   // Make dynamic text labeled buttons fixed width to prevent them from
   // jumping around when the content changes.
   .tox-tbtn--bespoke .tox-tbtn__select-label {
+    min-width: @toolbar-button-bespoke-label-min-width;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: @toolbar-button-bespoke-label-max-width;
+    width: @toolbar-button-bespoke-label-width;
   }
 }

@@ -14,28 +14,28 @@ import { createMenuItems, createSelectButton, FormatterFormatItem, PreviewSpec, 
 import { buildBasicSettingsDataset, Delimiter } from './SelectDatasets';
 import * as FormatRegister from './utils/FormatRegister';
 
-const defaultFontsizeFormats = '8pt 10pt 12pt 14pt 18pt 24pt 36pt';
+const defaultFontsizeFormats = '0.6rem 0.8rem 1rem 1.2rem 1.5rem 2rem 3rem';
 
 // See https://websemantics.uk/articles/font-size-conversion/ for conversions
 const legacyFontSizes: Record<string, string> = {
-  '8pt': '1',
-  '10pt': '2',
-  '12pt': '3',
-  '14pt': '4',
-  '18pt': '5',
-  '24pt': '6',
-  '36pt': '7'
+  '0.6rem': '1',
+  '0.8rem': '2',
+  '1rem': '3',
+  '1.2rem': '4',
+  '1.5rem': '5',
+  '2rem': '6',
+  '3rem': '7'
 };
 
 // Note: 'xx-small', 'x-small' and 'large' are rounded up to nearest whole pt
 const keywordFontSizes: Record<string, string> = {
-  'xx-small': '7pt',
-  'x-small': '8pt',
-  'small': '10pt',
-  'medium': '12pt',
-  'large': '14pt',
-  'x-large': '18pt',
-  'xx-large': '24pt'
+  'xx-small': '0.4rem',
+  'x-small': '0.6rem',
+  'small': '0.8rem',
+  'medium': '1rem',
+  'large': '1.2rem',
+  'x-large': '1.5rem',
+  'xx-large': '2rem'
 };
 
 const round = (number: number, precision: number) => {
@@ -52,6 +52,17 @@ const toPt = (fontSize: string, precision?: number): string => {
   }
 };
 
+const toRem = (fontSize: string, precision?: number): string => {
+  if (/[0-9.]+px$/.test(fontSize)) {
+    return round(parseInt(fontSize, 10) / 16, precision || 0) + 'rem';
+  }
+  else if (/[0-9.]+pt$/.test(fontSize)) {
+    return round(parseInt(fontSize, 10) / 12, precision || 0) + 'rem';
+  } else {
+    return Obj.get(keywordFontSizes, fontSize).getOr(fontSize);
+  }
+};
+
 const toLegacy = (fontSize: string): string => Obj.get(legacyFontSizes, fontSize).getOr('');
 
 const getSpec = (editor: Editor): SelectSpec => {
@@ -60,12 +71,18 @@ const getSpec = (editor: Editor): SelectSpec => {
     const items = dataset.data;
 
     const fontSize = editor.queryCommandValue('FontSize');
+
     if (fontSize) {
       // checking for three digits after decimal point, should be precise enough
       for (let precision = 3; matchOpt.isNone() && precision >= 0; precision--) {
         const pt = toPt(fontSize, precision);
+        const rem = toRem(fontSize, precision);
         const legacy = toLegacy(pt);
-        matchOpt = Arr.find(items, (item) => item.format === fontSize || item.format === pt || item.format === legacy);
+
+        matchOpt = Arr.find(items, (item) =>
+        {
+          return item.format === fontSize || item.format === pt || item.format === legacy || item.format === rem;
+        });
       }
     }
 
