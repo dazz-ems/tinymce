@@ -14,28 +14,28 @@ import { createMenuItems, createSelectButton, FormatterFormatItem, PreviewSpec, 
 import { buildBasicSettingsDataset, Delimiter } from './SelectDatasets';
 import * as FormatRegister from './utils/FormatRegister';
 
-const defaultFontsizeFormats = '0.6rem 0.8rem 1rem 1.2rem 1.5rem 2rem 3rem';
+const defaultFontsizeFormats = '0.8rem 1.2rem 1.6rem 2rem 2.4rem 3.2rem';
 
 // See https://websemantics.uk/articles/font-size-conversion/ for conversions
 const legacyFontSizes: Record<string, string> = {
-  '0.6rem': '1',
-  '0.8rem': '2',
-  '1rem': '3',
-  '1.2rem': '4',
-  '1.5rem': '5',
-  '2rem': '6',
-  '3rem': '7'
+  '0.8rem': '1',
+  '1.2rem': '2',
+  '1.6rem': '3',
+  '2rem': '4',
+  '2.4rem': '5',
+  '3.2rem': '6',
+  '4.8rem': '7'
 };
 
 // Note: 'xx-small', 'x-small' and 'large' are rounded up to nearest whole pt
 const keywordFontSizes: Record<string, string> = {
   'xx-small': '0.4rem',
-  'x-small': '0.6rem',
-  'small': '0.8rem',
-  'medium': '1rem',
-  'large': '1.2rem',
-  'x-large': '1.5rem',
-  'xx-large': '2rem'
+  'x-small': '0.8rem',
+  'small': '1.2rem',
+  'medium': '1.6rem',
+  'large': '2rem',
+  'x-large': '2.4rem',
+  'xx-large': '3.2rem'
 };
 
 const round = (number: number, precision: number) => {
@@ -53,11 +53,12 @@ const toPt = (fontSize: string, precision?: number): string => {
 };
 
 const toRem = (fontSize: string, precision?: number): string => {
+  // 1.0rem = 10px (for EMS) (Browser standard 1.0rem = 16px/12pt)
   if (/[0-9.]+px$/.test(fontSize)) {
-    return round(parseInt(fontSize, 10) / 16, precision || 0) + 'rem';
+    return round(parseInt(fontSize, 10) / 10, precision || 0) + 'rem';
   }
   else if (/[0-9.]+pt$/.test(fontSize)) {
-    return round(parseInt(fontSize, 10) / 12, precision || 0) + 'rem';
+    return round(parseInt(fontSize, 10) / 10 * (72 / 96), precision || 0) + 'rem';
   } else {
     return Obj.get(keywordFontSizes, fontSize).getOr(fontSize);
   }
