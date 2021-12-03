@@ -48,7 +48,7 @@ const insert = (editor: Editor, columns: number, rows: number, colHeaders: numbe
     const table = TableRender.render(rows, columns, rowHeaders, colHeaders, getTableHeaderType(editor), options);
     Attribute.set(table, 'data-mce-id', '__mce');
 
-    const html = Html.getOuter(table);
+    const html = Html.getOuter(table) + '\n<p></p>\n';
     editor.insertContent(html);
     editor.addVisual();
   });
