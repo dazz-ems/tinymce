@@ -44,7 +44,7 @@ const open = (editor: Editor) => {
         },
         {
           type: 'label',
-          label: 'アンカーを設置すると、記事内リンク先として選択できます。',
+          label: '設置したアンカーは、リンク先として選択可能になります。',
           items: []
         }
       ]
@@ -58,7 +58,7 @@ const open = (editor: Editor) => {
       {
         type: 'submit',
         name: 'save',
-        text: 'Save',
+        text: '設置',
         primary: true
       }
     ],
