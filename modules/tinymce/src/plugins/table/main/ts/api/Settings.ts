@@ -34,7 +34,7 @@ const determineDefaultStyles = (editor: Editor) => {
 };
 
 const defaultAttributes = {
-  border: '1'
+// border: '1'
 };
 
 const defaultColumnResizingBehaviour = 'preservetable';
