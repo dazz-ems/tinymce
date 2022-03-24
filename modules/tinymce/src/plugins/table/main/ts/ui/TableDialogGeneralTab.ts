@@ -52,15 +52,6 @@ const getItems = (editor: Editor, classes: Dialog.ListBoxItemSpec[], insertNewTa
       inputMode: 'numeric'
     },
     {
-      type: 'listbox',
-      name: 'border',
-      label: 'Border width',
-      items: [
-        { text:'NormalLine', value:'1px' },
-        { text:'BoldLine', value:'2px' }
-      ]
-    },
-    {
       type: 'label',
       label: 'Caption',
       items: [
@@ -69,6 +60,30 @@ const getItems = (editor: Editor, classes: Dialog.ListBoxItemSpec[], insertNewTa
           name: 'caption',
           label: 'Show caption'
         }
+      ]
+    },
+    {
+      type: 'label',
+      label: 'キャプションの配置',
+      items: [
+        {
+          type: 'selectbox',
+          name: 'captionAlign',
+          items: [
+            { text:'中央', value:'' },
+            { text:'左寄せ', value:'left' },
+            { text:'右寄せ', value:'right' }
+          ]
+        }
+      ]
+    },
+    {
+      type: 'listbox',
+      name: 'border',
+      label: 'Border width',
+      items: [
+        { text:'NormalLine', value:'1px' },
+        { text:'BoldLine', value:'2px' }
       ]
     }
   ] : [];

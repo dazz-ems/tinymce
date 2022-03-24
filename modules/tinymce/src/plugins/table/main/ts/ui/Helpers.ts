@@ -157,6 +157,7 @@ export interface TableData {
   cellspacing: string;
   cellpadding: string;
   caption: boolean;
+  captionAlign: string;
   class?: string;
   align: string;
   border: string;
@@ -183,6 +184,7 @@ const extractDataFromSettings = (editor: Editor, hasAdvTableTab: boolean): Table
     cellspacing: '',
     cellpadding: '',
     caption: false,
+    captionAlign: '',
     class: '',
     align: '',
     border: ''
@@ -233,6 +235,15 @@ const extractDataFromTableElement = (editor: Editor, elm: Element, hasAdvTableTa
       || Styles.getTDTHOverallStyle(editor.dom, elm, 'border');
   };
 
+  const getCaptionAlign = (dom: DOMUtils, elm: Element): string => {
+    const caption = dom.select('caption', elm)[0];
+    if (caption)
+    {
+      return dom.getStyle(caption, 'text-align');
+    }
+    return '';
+  };
+
   const dom = editor.dom;
 
   return {
@@ -242,6 +253,7 @@ const extractDataFromTableElement = (editor: Editor, elm: Element, hasAdvTableTa
     cellpadding: dom.getAttrib(elm, 'cellpadding') || Styles.getTDTHOverallStyle(editor.dom, elm, 'padding'),
     border: getBorder(dom, elm),
     caption: !!dom.select('caption', elm)[0],
+    captionAlign: getCaptionAlign(dom, elm),
     class: dom.getAttrib(elm, 'class', ''),
     align: getHAlignment(editor, elm),
     ...(hasAdvTableTab ? extractAdvancedStyles(dom, elm) : {})

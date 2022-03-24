@@ -124,6 +124,11 @@ const onSubmitTableForm = (editor: Editor, tableElm: Element, api: Dialog.Dialog
       tableElm.insertBefore(captionElm, tableElm.firstChild);
     }
 
+    if (captionElm )
+    {
+      dom.setStyle(captionElm, 'text-align', data.captionAlign);
+    }
+
     if (data.align === '') {
       Styles.unApplyAlign(editor, tableElm);
     } else {
