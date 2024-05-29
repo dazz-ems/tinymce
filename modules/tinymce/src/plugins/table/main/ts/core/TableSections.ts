@@ -91,7 +91,7 @@ const renameCell = (editor: Editor, cell: HTMLTableCellElement, newCellType?: 't
   }
 };
 
-const switchCellType = (editor: Editor, cell: HTMLTableCellElement, newCellType?: 'td' | 'th', scope?: 'col' | null): HTMLTableCellElement => {
+const switchCellType = (editor: Editor, cell: HTMLTableCellElement, newCellType?: 'td' | 'th', scope?: string): HTMLTableCellElement => {
   const dom = editor.dom;
   const newCell = renameCell(editor, cell, newCellType);
   if (!Type.isUndefined(scope)) {
@@ -100,7 +100,7 @@ const switchCellType = (editor: Editor, cell: HTMLTableCellElement, newCellType?
   return newCell;
 };
 
-const switchCellsType = (editor: Editor, cells: ArrayLike<HTMLTableCellElement>, newCellType?: 'td' | 'th', scope?: 'col' | null) =>
+const switchCellsType = (editor: Editor, cells: ArrayLike<HTMLTableCellElement>, newCellType?: 'td' | 'th', scope?: string) =>
   Arr.each(cells, (c) => switchCellType(editor, c, newCellType, scope));
 
 const switchSectionType = (editor: Editor, rowElm: HTMLTableRowElement, newType: string) => {

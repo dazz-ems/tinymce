@@ -85,7 +85,7 @@ const applyCellData = (editor: Editor, cells: SugarElement<HTMLTableCellElement>
     getSelectedCells(cells).each((selectedCells) => {
       Arr.each(selectedCells, (item) => {
         // Switch cell type if applicable
-        const cellElm = switchCellType(editor, item.element, data.celltype);
+        const cellElm = switchCellType(editor, item.element, data.celltype, data.scope);
         const modifier = isSingleCell ? DomModifier.normal(editor, cellElm) : DomModifier.ifTruthy(editor, cellElm);
         const colModifier = item.column.map((col) =>
           isSingleCell ? DomModifier.normal(editor, col) : DomModifier.ifTruthy(editor, col)
